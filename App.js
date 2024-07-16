@@ -1,57 +1,119 @@
+import { useState, useEffect } from 'react';
 import { StatusBar } from 'expo-status-bar';
-import { 
-  StyleSheet,
-  View
-} from 'react-native';
-import useDeviceWidth from './hooks/useDeviceWidth'
-import FunctionButtons from './components/FunctionButtons';
-import NumberPad from './components/NumberPad'
-import ZeroAndDot from './components/ZeroAndDot'
-import Operators from './components/Operators'
+import { StyleSheet, View, Text, SafeAreaView } from 'react-native';
+import useDeviceSize from './hooks/useDeviceSize'
+import Button from './components/Button';
+import formatDisplay from './functions/formatDisplay'
 
 export default function App() {
-  const deviceWidth = useDeviceWidth()
+  const { mainWidth, mainHeight } = useDeviceSize()
+  const [indicator, setIndicator] = useState('0')
+  const [value, setValue] = useState(0)
+  const [cache, setCache] = useState(0)
+  const [operator, setOperator] = useState(null)
+  const [dot, setDot] = useState(false)
+
+  useEffect(() => {
+    setIndicator(formatDisplay(value));
+  }, [value])
+
+  function onPress(btn) {
+    if (btn === 'C') {
+      setValue(0)
+    } 
+    
+    else if (btn === 'AC') {
+      setValue(0)
+      setCache(0)
+      setOperator(null)
+    }
+
+    else if (btn === '+/−') {
+      setValue(prevState => prevState * -1)
+    }
+
+    else if (btn === '%') {
+      setValue(prevState => prevState / 100)
+    }
+
+    else if (btn === '.') {
+      if(Number(value) === value && value !== Math.floor(value)) {
+        return
+      }
+      setDot(true)
+    }
+
+    else if (btn === '+' || btn === '−' || btn === '×' || btn === '÷') {
+      setCache(value)
+      setValue(0)
+      setOperator(btn)
+    }
+
+    else if (btn === '=') {}
+    
+    else {
+      setValue(parseInt(btn))
+    }
+  }
+
   return (
-    <View style={ styles.container }>
+    <SafeAreaView style={ styles.container }>
       <StatusBar style="auto" />
-      <View style={ styles.funcAndNum }>
-        <View style={[ styles.numberPad, { width: deviceWidth * 0.75 } ]}>
-          <FunctionButtons />
+      <View style={[ styles.main, { width: mainWidth, height: mainHeight } ]}>
+        <View style={[ styles.indicator, { padding: mainWidth * 0.05 } ]}>
+          <Text style={[ styles.indicatorText, { fontSize: mainWidth / 5.5 } ]}>{ indicator }</Text>
         </View>
-        <View style={[ styles.numberPad, { width: deviceWidth * 0.75 } ]}>
-          <NumberPad />
-        </View>
-        <View style={[ styles.numberPad, { width: deviceWidth * 0.75 } ]}>
-          <ZeroAndDot />
+        <View style= {styles.keyPad}>
+          <Button label={ value === 0 ? 'AC' : 'C' } color={ 'black' } bgcolor={ 'rgb(180, 180, 180)' } func={ onPress } smallFont />
+          <Button label={ '+/−' } color={ 'black' } bgcolor={ 'rgb(180, 180, 180)' } func={ onPress } smallFont />
+          <Button label={ '%' } color={ 'black' } bgcolor={ 'rgb(180, 180, 180)' } func={ onPress } smallFont />
+          <Button label={ '÷' } color={ 'white' } bgcolor={ 'rgb(0, 135, 145)' } func={ onPress } highlight={ operator === '÷' } />
+          <Button label={ '7' } color={ 'white' } bgcolor={ 'rgb(60, 60, 60)' } func={ onPress } />
+          <Button label={ '8' } color={ 'white' } bgcolor={ 'rgb(60, 60, 60)' } func={ onPress } />
+          <Button label={ '9' } color={ 'white' } bgcolor={ 'rgb(60, 60, 60)' } func={ onPress } />
+          <Button label={ '×' } color={ 'white' } bgcolor={ 'rgb(0, 135, 145)' } func={ onPress } highlight={ operator === '×' } />
+          <Button label={ '4' } color={ 'white' } bgcolor={ 'rgb(60, 60, 60)' } func={ onPress } />
+          <Button label={ '5' } color={ 'white' } bgcolor={ 'rgb(60, 60, 60)' } func={ onPress } />
+          <Button label={ '6' } color={ 'white' } bgcolor={ 'rgb(60, 60, 60)' } func={ onPress } />
+          <Button label={ '−' } color={ 'white' } bgcolor={ 'rgb(0, 135, 145)' } func={ onPress } highlight={ operator === '−' } />
+          <Button label={ '1' } color={ 'white' } bgcolor={ 'rgb(60, 60, 60)' } func={ onPress } />
+          <Button label={ '2' } color={ 'white' } bgcolor={ 'rgb(60, 60, 60)' } func={ onPress } />
+          <Button label={ '3' } color={ 'white' } bgcolor={ 'rgb(60, 60, 60)' } func={ onPress } />
+          <Button label={ '+' } color={ 'white' } bgcolor={ 'rgb(0, 135, 145)' } func={ onPress } highlight={ operator === '+' } />
+          <Button label={ '0' } color={ 'white' } bgcolor={ 'rgb(60, 60, 60)' } func={ onPress } doubleSize />
+          <Button label={ '.' } color={ 'white' } bgcolor={ 'rgb(60, 60, 60)' } func={ onPress } />
+          <Button label={ '=' } color={ 'white' } bgcolor={ 'rgb(0, 135, 145)' } func={ onPress } />
         </View>
       </View>
-      <View style={ [styles.operators, { width: deviceWidth * 0.25 } ] }>
-          <Operators />
-      </View>
-    </View>
+    </SafeAreaView>
   );
 }
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    flexDirection: 'row',
     backgroundColor: '#000',
     alignItems: 'center',
     justifyContent: 'center',
   },
-  funcAndNum: {
-    flex: 1,
-    alignItems: 'center',
-    justifyContent: 'center',
+  main: {
+    // backgroundColor: '#fff',
+    // height: '100%'
   },
-  numberPad: {
-    flexDirection: 'row',
+  indicator: {
+    height: '25%',
+    alignItems: 'flex-end',
+    justifyContent: 'flex-end'
+  },
+  indicatorText: {
+    color: 'white',
+    
+  },
+  keyPad: {
+    height: '75%',
     flexWrap: 'wrap',
-  },
-  operators: {
-    height: '100%',
+    flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
-  }
+  },
 });

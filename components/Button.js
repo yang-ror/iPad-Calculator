@@ -4,31 +4,39 @@ import {
   View,
   Pressable
 } from 'react-native';
-import useDeviceWidth from '../hooks/useDeviceWidth';
+import useDeviceSize from '../hooks/useDeviceSize';
 import getLighterColor from '../functions/getLighterColor';
 
-const Button = ({ label, color, bgcolor, func, doubleSize = false }) => {
-  const deviceWidth = useDeviceWidth()
-  const buttonSize = deviceWidth * 0.25
+const Button = ({ label, color, bgcolor, func, smallFont = false, doubleSize = false, highlight = false }) => {
+  const { mainWidth } = useDeviceSize()
+  const buttonSize = mainWidth * 0.25
 
   return (
-    <View style={{ width: buttonSize * (doubleSize ? 2 : 1), height: buttonSize, padding: buttonSize * 0.1 }}>
+    <View style={{ 
+      width: buttonSize * (doubleSize ? 2 : 1), 
+      height: buttonSize, 
+      padding: buttonSize * 0.09 
+    }}>
       <Pressable
         style={({ pressed }) => [ 
-          styles.buttom,
-          { backgroundColor: bgcolor },
+          styles.button,
+          { 
+            backgroundColor: highlight ? 'white' : bgcolor, 
+            alignItems: doubleSize ? '' : 'center', 
+            paddingLeft: doubleSize ? buttonSize * 0.3 : 0 
+          },
           pressed && { backgroundColor: getLighterColor(bgcolor) }
         ]} 
         onPress={ () => func(label) }
       >
-        <Text style={{ color: color, fontSize: 64 }}>{label}</Text>
+        <Text style={{ color: highlight ? 'rgb(0, 135, 145)' : color, fontSize: buttonSize / (smallFont ? 3 : 2.5) }}>{label}</Text>
       </Pressable>
     </View>
   )
 }
 
 const styles = StyleSheet.create({
-  buttom: {
+  button: {
     width: "100%",
     height: "100%",
     borderRadius: 1000,
