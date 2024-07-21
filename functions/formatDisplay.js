@@ -1,7 +1,8 @@
 export default function formatDisplay(value, maxDigits = 8) {
-  let formatted = parseFloat(value).toString();
+  if (!value) return 0
+  if (value === 'Error') return value
 
-  if (!formatted) return value
+  let formatted = parseFloat(value).toString();
   
   if (formatted.length > maxDigits) {
     if (formatted.includes('e')) {
